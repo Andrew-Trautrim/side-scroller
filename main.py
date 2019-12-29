@@ -1,10 +1,11 @@
 import arcade
 import os
 
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1684
+SCREEN_HEIGHT = 920
+BLOCK_SIZE = 64
 PLAYER_SPEED = 5
-test = None
+grass = dirt = stone = smoke = None
 
 class Player():
     def __init__(self, position_x, position_y, color):
@@ -29,13 +30,25 @@ class SunshineSuperman(arcade.Window):
         self.player = Player(64, 64, arcade.color.WHITE)
 
     def setup(self):
-        global test
+        global grass, dirt, stone, smoke
         filename = os.getcwd() + '/assets/grass.tif'
-        test = arcade.load_texture(filename, scale=1)
+        grass = arcade.load_texture(filename, scale=1)
+        filename = os.getcwd() + '/assets/dirt.tif'
+        dirt = arcade.load_texture(filename, scale=1)
+        filename = os.getcwd() + '/assets/stone.tif'
+        stone = arcade.load_texture(filename, scale=1)
+        filename = os.getcwd() + '/assets/smoke.tif'
+        smoke = arcade.load_texture(filename, scale=1)
 
     def on_draw(self):
         arcade.start_render()
         self.player.draw()
+        for x in range(0, 10):
+            for y in range(0, 3):
+                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 0 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, smoke)
+                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 200 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, grass)
+                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 400 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, dirt)
+                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 600 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, stone)
 
     def update(self, delta_time):
         self.player.update()
