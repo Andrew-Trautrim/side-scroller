@@ -42,13 +42,13 @@ class SunshineSuperman(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        self.player.draw()
         for x in range(0, 10):
             for y in range(0, 3):
                 arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 0 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, smoke)
                 arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 200 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, grass)
                 arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 400 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, dirt)
                 arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 600 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, stone)
+        self.player.draw()
 
     def update(self, delta_time):
         self.player.update()
