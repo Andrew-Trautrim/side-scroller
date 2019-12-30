@@ -5,49 +5,13 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 BLOCK_SIZE = 32
 
-PLAYER_SPEED = 8
-JUMP_SPEED = 16
-SPRITE_SCALE = 0.125
+PLAYER_SPEED = 4
+JUMP_SPEED = 12
+SPRITE_SCALE = BLOCK_SIZE / 256 # All textures are 256 x 256
 GRAVITY = 1
-
-GRASS = DIRT = STONE = CLOUD = None
 
 def asset_path(name):
     return os.getcwd() + '/assets/' + name
-
-class Level():
-    # Note: Game setup must be run before any instances of Level are created
-    char_to_texture = None
-    grid = []
-
-    def __init__(self):
-        pass
-
-    def setup(self):
-        global GRASS, DIRT, STONE, CLOUD # Assumption: These have been initialized to textures
-        self.char_to_texture = {' ': None, 'g': GRASS, 'd': DIRT, 's': STONE, 'c': CLOUD}
-        with open(asset_path('practice.txt')) as level:
-            for line in level:
-                self.grid.append([])
-                for c in line:
-                    if c == '\n': continue
-                    self.grid[-1].append(self.char_to_texture[c])
-        # Take the transpose of the grid due to the array initalization order causing the values to be read in the wrong order
-        self.grid = [*zip(*self.grid)]
-
-    def draw(self):
-        for x in range(len(self.grid)):
-            for y in range(len(self.grid[x])):
-                if self.grid[x][y]:
-                    offset = BLOCK_SIZE / 2
-                    arcade.draw_texture_rectangle(
-                        offset + (x * BLOCK_SIZE),
-                        SCREEN_HEIGHT - offset - (y * BLOCK_SIZE),
-                        BLOCK_SIZE,
-                        BLOCK_SIZE,
-                        self.grid[x][y])
-                    
-CURRENT_LEVEL = Level()
 
 class SunshineSuperman(arcade.Window):
 
@@ -56,7 +20,7 @@ class SunshineSuperman(arcade.Window):
         arcade.set_background_color(arcade.color.BABY_BLUE_EYES)
 
         # Set up sprite lists
-        self.wall_list = None
+        self.block_list = None
         self.player_list = None
 
         # Set up player values
@@ -66,47 +30,33 @@ class SunshineSuperman(arcade.Window):
         self.view_bottom = 0
 
     def setup(self):
-        global GRASS, DIRT, STONE, CLOUD
-        GRASS = arcade.load_texture(asset_path('grass.tif'))
-        DIRT  = arcade.load_texture(asset_path('dirt.tif'))
-        STONE = arcade.load_texture(asset_path('stone.tif'))
-        CLOUD = arcade.load_texture(asset_path('cloud.tif'))
-
-        self.wall_list = arcade.SpriteList()
+        self.block_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
-
-        # Draw blocks on the bottom
-        for x in range(0, SCREEN_WIDTH, BLOCK_SIZE):
-            wall = arcade.Sprite(asset_path('grass.tif'), SPRITE_SCALE)
-            wall.bottom = 0
-            wall.left = x
-            self.wall_list.append(wall)
-
-        # Platform
-        for x in range(BLOCK_SIZE * 3, BLOCK_SIZE * 8, BLOCK_SIZE):
-            wall = arcade.Sprite(asset_path('cloud.tif'), SPRITE_SCALE)
-            wall.bottom = BLOCK_SIZE * 3
-            wall.left = x
-            self.wall_list.append(wall)
-
+        
+        char_to_path = {'g': 'grass.tif', 'd': 'dirt.tif', 's': 'stone.tif', 'c': 'cloud.tif'}
+        with open(asset_path('practice.txt')) as level:
+            for y, line in enumerate(level):
+                for x, c in enumerate(line):
+                    if c == '\n' or c == ' ': continue
+                    block = arcade.Sprite(asset_path(char_to_path[c]), SPRITE_SCALE)
+                    block.bottom = SCREEN_HEIGHT - ((y + 1) * BLOCK_SIZE) # Add one to y since looking at block bottom
+                    block.left = x * BLOCK_SIZE
+                    self.block_list.append(block)
+                    
         # Set up player
-        self.player_sprite = arcade.Sprite(asset_path('stone.tif'), SPRITE_SCALE)
+        self.player_sprite = arcade.Sprite(asset_path('stone.tif'), SPRITE_SCALE / 2)
         self.player_list.append(self.player_sprite)
         self.player_sprite.center_x = 64
-        self.player_sprite.center_y = 256
+        self.player_sprite.center_y = SCREEN_HEIGHT + BLOCK_SIZE
 
         # Set up physics engine
-        self.phyics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, gravity_constant=GRAVITY)
+        self.phyics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.block_list, gravity_constant=GRAVITY)
 
     def on_draw(self):
-        global CURRENT_LEVEL
-
         arcade.start_render()
-        CURRENT_LEVEL.draw()
-
         # Render environment objects: blocks, players, etc.
         self.player_list.draw()
-        self.wall_list.draw()
+        self.block_list.draw()
 
     def on_update(self, delta_time):
         self.phyics_engine.update()
@@ -124,11 +74,8 @@ class SunshineSuperman(arcade.Window):
             self.player_sprite.change_x = 0
 
 def main():
-    global CURRENT_LEVEL
-
     game = SunshineSuperman(SCREEN_WIDTH, SCREEN_HEIGHT)
     game.setup()
-    CURRENT_LEVEL.setup()
     arcade.run()
 
 if __name__ == "__main__":
