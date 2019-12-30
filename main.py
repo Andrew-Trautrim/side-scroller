@@ -1,36 +1,38 @@
 import arcade
 import os
 
-SCREEN_WIDTH = 1684
-SCREEN_HEIGHT = 920
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 BLOCK_SIZE = 64
-PLAYER_SPEED = 5
+
+PLAYER_SPEED = 8
+JUMP_SPEED = 8
+SPRITE_SCALE = 0.25
+SPRITE_SIZE = int(64 * SPRITE_SCALE)
+GRAVITY = 0.5
+
 grass = dirt = stone = smoke = None
-
-class Player():
-    def __init__(self, position_x, position_y, color):
-        self.position_x = position_x
-        self.position_y = position_y
-        self.change_x = 0
-        self.change_y = 0
-        self.color = color
-    
-    def draw(self):
-        arcade.draw_circle_filled(self.position_x, self.position_y, 32, self.color)
-
-    def update(self):
-        self.position_x += self.change_x
-        self.position_y += self.change_y
 
 class SunshineSuperman(arcade.Window):
 
     def __init__(self, width, height):
         super().__init__(width, height)
         arcade.set_background_color(arcade.color.BABY_BLUE_EYES)
-        self.player = Player(64, 64, arcade.color.WHITE)
+
+        # set up sprite lists
+        self.wall_list = None
+        self.player_list = None
+
+        # set up player values
+        self.player_sprite = None
+        self.phyics_engine = None
+        self.view_left = 0
+        self.view_bottom = 0
 
     def setup(self):
-        global grass, dirt, stone, smoke
+
+        # block rendering
+        """global grass, dirt, stone, smoke
         filename = os.getcwd() + '/assets/grass.tif'
         grass = arcade.load_texture(filename, scale=1)
         filename = os.getcwd() + '/assets/dirt.tif'
@@ -38,30 +40,60 @@ class SunshineSuperman(arcade.Window):
         filename = os.getcwd() + '/assets/stone.tif'
         stone = arcade.load_texture(filename, scale=1)
         filename = os.getcwd() + '/assets/smoke.tif'
-        smoke = arcade.load_texture(filename, scale=1)
+        smoke = arcade.load_texture(filename, scale=1)"""
+
+        self.wall_list = arcade.SpriteList()
+        self.player_list = arcade.SpriteList()
+
+        # draw blocks on the bottom
+        for x in range(0, SCREEN_WIDTH, SPRITE_SIZE):
+            filename = os.getcwd() + '/side-scroller/assets/grass.tif'
+            wall = arcade.Sprite(filename, SPRITE_SCALE)
+
+            wall.bottom = 0
+            wall.left = x
+            self.wall_list.append(wall)
+
+        # platform
+        for x in range(SPRITE_SIZE * 3, SPRITE_SIZE * 8, SPRITE_SIZE):
+            filename = os.getcwd() + '/side-scroller/assets/smoke.tif'
+            wall = arcade.Sprite(filename, SPRITE_SCALE)
+
+            wall.bottom = SPRITE_SIZE * 3
+            wall.left = x
+            self.wall_list.append(wall)
+
+        # set up player
+        filename = os.getcwd() + '/side-scroller/assets/stone.tif'
+        self.player_sprite = arcade.Sprite(filename, SPRITE_SCALE)
+        self.player_list.append(self.player_sprite)
+        self.player_sprite.center_x = 64
+        self.player_sprite.center_y = 256
+
+        # set up physics engine
+        self.phyics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, gravity_constant=GRAVITY)
 
     def on_draw(self):
         arcade.start_render()
-        for x in range(0, 10):
-            for y in range(0, 3):
-                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 0 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, smoke)
-                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 200 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, grass)
-                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 400 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, dirt)
-                arcade.draw_texture_rectangle(100 + (x * BLOCK_SIZE), 600 + (y * BLOCK_SIZE), BLOCK_SIZE, BLOCK_SIZE, stone)
-        self.player.draw()
 
-    def update(self, delta_time):
-        self.player.update()
+        # render environment objects: blocks, players, etc.
+        self.player_list.draw()
+        self.wall_list.draw()
+
+    def on_update(self, delta_time):
+        self.phyics_engine.update()
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.LEFT:
-            self.player.change_x = -PLAYER_SPEED
+        if key == arcade.key.SPACE and self.phyics_engine.can_jump():
+            self.player_sprite.change_y = JUMP_SPEED
+        elif key == arcade.key.LEFT:
+            self.player_sprite.change_x = -PLAYER_SPEED
         elif key == arcade.key.RIGHT:
-            self.player.change_x = PLAYER_SPEED
+            self.player_sprite.change_x = PLAYER_SPEED
 
     def on_key_release(self, key, modifiers):
         if key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player.change_x = 0
+            self.player_sprite.change_x = 0
 
 def main():
     game = SunshineSuperman(SCREEN_WIDTH, SCREEN_HEIGHT)
