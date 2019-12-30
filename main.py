@@ -3,13 +3,12 @@ import os
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-BLOCK_SIZE = 64
+BLOCK_SIZE = 32
 
 PLAYER_SPEED = 8
-JUMP_SPEED = 8
-SPRITE_SCALE = 0.25
-SPRITE_SIZE = int(64 * SPRITE_SCALE)
-GRAVITY = 0.5
+JUMP_SPEED = 16
+SPRITE_SCALE = 0.125
+GRAVITY = 1
 
 grass = dirt = stone = smoke = None
 
@@ -46,7 +45,7 @@ class SunshineSuperman(arcade.Window):
         self.player_list = arcade.SpriteList()
 
         # draw blocks on the bottom
-        for x in range(0, SCREEN_WIDTH, SPRITE_SIZE):
+        for x in range(0, SCREEN_WIDTH, BLOCK_SIZE):
             filename = os.getcwd() + '/side-scroller/assets/grass.tif'
             wall = arcade.Sprite(filename, SPRITE_SCALE)
 
@@ -55,11 +54,11 @@ class SunshineSuperman(arcade.Window):
             self.wall_list.append(wall)
 
         # platform
-        for x in range(SPRITE_SIZE * 3, SPRITE_SIZE * 8, SPRITE_SIZE):
+        for x in range(BLOCK_SIZE * 3, BLOCK_SIZE * 8, BLOCK_SIZE):
             filename = os.getcwd() + '/side-scroller/assets/smoke.tif'
             wall = arcade.Sprite(filename, SPRITE_SCALE)
 
-            wall.bottom = SPRITE_SIZE * 3
+            wall.bottom = BLOCK_SIZE * 3
             wall.left = x
             self.wall_list.append(wall)
 
