@@ -2,16 +2,16 @@ import arcade
 import os
 
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 576
 BLOCK_SIZE = 32
 
 PLAYER_SPEED = 4
-JUMP_SPEED = 12
+JUMP_SPEED = 9
 SPRITE_SCALE = BLOCK_SIZE / 256 # All textures are 256 x 256
-GRAVITY = 1
+GRAVITY = 0.5
 
 def asset_path(name):
-    return os.getcwd() + '/assets/' + name
+    return os.getcwd() + '/side-scroller/assets/' + name
 
 class SunshineSuperman(arcade.Window):
 

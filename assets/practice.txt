@@ -1,8 +1,18 @@
+
+  ccc
+
+             cc
+           ccccc
+                      c 
+       ccc          cccc
+       cc
+            cc
+ cc               cc
+ccccc           ccc
+          cccc
+        ccc
           
-cc cccc  c
-cc cccc  c
-          
- gg  ss  s
-gddg  ssss
-ddddg    s
-dddddggggg
+ gg  sss  
+gddg   ssss
+ddddg    sss
+dddddgggggggggggggggggggg
